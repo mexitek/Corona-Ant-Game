@@ -1,10 +1,14 @@
+-- ** load all libraries being used ** --
+local ui = require( "libraries/ui" );
+local imgs = require( "libraries/images" );
+
 -- ** Set app data (as globals) ** --
 app_globals = {
 	-- hide status bar of phone --
 	hide_status_bar = display.setStatusBar( display.HiddenStatusBar ),
 	
 	-- set game background --
-	background = display.newImage ("images/bg_meadow.png"),
+	background = display.newImage( imgs.fetchImagePath( "bg_meadow.png" ) ),
 	
 	-- calculate center of the x axis
 	centerX = display.contentWidth / 2,
@@ -13,23 +17,23 @@ app_globals = {
 	total_balls = 0,
 	
 	-- limit of balls --
-	max_balls = 6
+	max_balls = 20,
+	
+	-- ** universal gravity ** --
+	gravity = { x = 1.5, y = 20 },
+	
+	-- ** determine if high res ** --
+	is_high_res = imgs.isHighRes()
 };
+
+-- ** cache math library functions ** --
+local rand = math.random;
 
 -- ** add and start physics, set gravity (explained in part 1) ** --
 local physics = require("physics");
 physics.start();
-physics.setGravity( 1, 20 );
-
---[[ ** spin ball ** --
-local max = math.max;
-local min = math.min;
-local function rotate( e )
-	local r =  app_globals.centerX - e.x;  -- (shift values to between eg -240 to 240)
-	r = min( r, 150 );
-	r = max( r, -150 );
-	tennis_ball.rotation = r;
-end]]--
+-- physics.pause();
+physics.setGravity( app_globals.gravity.x, app_globals.gravity.y );
 
 -- ** create tennis ball ** --
 local function createBall( ball_count )
@@ -44,11 +48,12 @@ local function createBall( ball_count )
 	tennis_ball.bounces = 0;  -- set to zero --
 	
 	-- ** position tennis ball ** --
-	tennis_ball.x = 160;  -- set x axis --
+	tennis_ball.x = rand( 15, 305 );  -- set x axis --
 	tennis_ball.y = -15;  -- set y axis --
+	tennis_ball.rotation = 1;
 	
 	-- ** add physics to ball ** --
-	physics.addBody( tennis_ball, { bounce=0.8, density=1.0 } );
+	physics.addBody( tennis_ball, { bounce = 0.8, density = 1.0 } );
 	
 	-- ** incremente count of balls ** --
 	app_globals.total_balls = app_globals.total_balls + 1;
@@ -66,6 +71,7 @@ local function spawnBall()
 		-- ** fetch new ball ** --
 		timer.performWithDelay( 100,
 			function()
+				-- ** create ball ** --
 				createBall( app_globals.total_balls );
 			end,
 		1 );
@@ -99,8 +105,63 @@ Runtime:addEventListener( "collision", ballBounce );
 floor = display.newRect( 0, 430, 320, 50 );
 floor.alpha = 0;
 	
-	-- adds phyiscs properties to the newly added floor
-	physics.addBody( floor, "static", { bounce=0.4, density=1.0 } );
+-- adds phyiscs properties to the newly added floor
+physics.addBody( floor, "static", { bounce = 0.4, density = 1.0 } );
+
+-- ** add ant to stage (global access) ** --
+ant_player = display.newImage( "images/bg_ant.png" );
+
+	-- ** set in middle of screen (on the floor) ** --
+	ant_player.x = 160;
+	ant_player.y = 405;
+	
+	-- ** add physics to ant ** --
+	physics.addBody( ant_player, "kinematic" );
+	
+-- ** game controls ** --
+	
+	-- ** interpret touch control ** --
+	local moveLeft = function( e )
+	
+		-- ** move 30px to the left ** --
+		transition.to( ant_player, { time = 100, x= ( ant_player.x - 30 ) } );
+	
+	end
+	
+	local moveRight = function( e )
+	
+		-- ** move 30px to the right ** --
+		transition.to( ant_player, { time = 100, x= ( ant_player.x + 30 ) } );
+	
+	end
+	
+	-- ** create controls ** --
+	local left_btn = ui.newButton{
+		default = imgs.fetchImagePath( "btn_left.png" ),
+		-- over = "btn_whoA.png",
+		onRelease = moveLeft
+	};
+	
+	local right_btn = ui.newButton{
+		default = imgs.fetchImagePath( "btn_right.png" ),
+		-- over = "btn_whoA.png",
+		onRelease = moveRight
+	};
+		
+		-- ** position controls ** --
+		if( app_globals.is_high_res ) then
+			left_btn.x = 52;	
+			left_btn.y = 910;
+			right_btn.x = 590;
+			right_btn.y = 910;
+		else
+			left_btn.x = 26;	
+			left_btn.y = 455;
+			right_btn.x = 295;
+			right_btn.y = 455;
+		end
 	
 -- ** start balls ** --
 spawnBall();
+
+--native.showAlert( "test", display.stageWidth .. " == " .. display.stageHeight );
