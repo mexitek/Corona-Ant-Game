@@ -44,7 +44,7 @@ local function createBall( ball_count )
 	tennis_ball.bounces = 0;  -- set to zero --
 	
 	-- ** position tennis ball ** --
-	tennis_ball.x = 160;  -- set x axis --
+	tennis_ball.x = math.random(1,200);  -- set x axis --
 	tennis_ball.y = -15;  -- set y axis --
 	
 	-- ** add physics to ball ** --
