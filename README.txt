@@ -3,7 +3,7 @@
 /*******************************/
 ***  Created by: joze PEREZ  ***
 ***    joze@jozeperez.com    ***
-***     © copyright 2011     ***
+***    (c) copyright 2011    ***
 /*******************************/
 
 
