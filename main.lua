@@ -68,7 +68,7 @@ end
 local function spawnBall()
 	
 	-- ** check to see if max balls created ** --
-	if( app_globals.total_balls < app_globals.max_balls ) then
+	--if( app_globals.total_balls < app_globals.max_balls ) then
 		-- ** fetch new ball ** --
 		timer.performWithDelay( 100,
 			function()
@@ -77,7 +77,8 @@ local function spawnBall()
 			end,
 		1 );
 		-- local new_ball = createBall( app_globals.total_balls );
-	end
+		
+	--end
 end
 
 -- ** ball bounce event handler ** --
@@ -110,20 +111,27 @@ floor.alpha = 0;
 physics.addBody( floor, "static", { bounce = 0.4, density = 1.0 } );
 
 -- ** add ant to stage (global access) ** --
-ant_player = display.newImage( "images/bg_ant.png" );
-
 -- ** set in middle of screen (on the floor) ** --
+ant_player = display.newImage( "images/bg_ant.png" );
 ant_player.x = 160;
 ant_player.y = 405;
+
+-- ** Teleport Method ** --
 ant_teleport = function(e)
 	-- ** Make Ant disappear ** --
-	transition.to(ant_player, {time = 10, alpha = 0, onComplete=function() 
-		-- ** Move to the touch x axis ** --
-		transition.to( ant_player, { time = 100, x=e.x, onComplete=function() 
-			-- ** Make Ant appear ** --
-			transition.to(ant_player, {time = 10, alpha = 1} );
-		end} );
-	end} );
+	transition.to(ant_player, {time = 10, alpha = 0,y=600, onComplete=function() 
+		-- ** Move the y axis (drop from stage) ** --
+		transition.to(ant_player, {time = 10, y=600, onComplete=function() 
+			-- ** Move to the touch x axis to new location ** --
+			transition.to( ant_player, { time = 100, x=e.x, onComplete=function() 
+				-- ** Reintroduce the y axis to the stage ** --
+				transition.to(ant_player, {time = 10, y=405, onComplete=function()
+					-- ** Make Ant appear ** --
+					transition.to(ant_player, {time = 10, alpha = 1} );
+				end});-- End Reintroduce original y axis
+			end} );-- End move to new x axis
+		end}); -- End Move ant backstage
+	end} );-- End Disappear
 	
 	-- ** Notify application the ant has moved ** --
 	subpub.publish("ant_moved",antplayer);
