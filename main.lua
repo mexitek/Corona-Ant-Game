@@ -116,8 +116,15 @@ ant_player = display.newImage( "images/bg_ant.png" );
 ant_player.x = 160;
 ant_player.y = 405;
 ant_teleport = function(e)
-	-- ** move 30px to the right ** --
-	transition.to( ant_player, { time = 100, x=e.x } );
+	-- ** Make Ant disappear ** --
+	transition.to(ant_player, {time = 10, alpha = 0, onComplete=function() 
+		-- ** Move to the touch x axis ** --
+		transition.to( ant_player, { time = 100, x=e.x, onComplete=function() 
+			-- ** Make Ant appear ** --
+			transition.to(ant_player, {time = 10, alpha = 1} );
+		end} );
+	end} );
+	
 	-- ** Notify application the ant has moved ** --
 	subpub.publish("ant_moved",antplayer);
 end
