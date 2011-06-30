@@ -49,7 +49,7 @@ local function createBall( ball_count )
 	tennis_ball.bounces = 0;  -- set to zero --
 	
 	-- ** position tennis ball ** --
-	tennis_ball.x = rand( 15, 305 );  -- set x axis --
+	tennis_ball.x = ant_player.x;  -- set x axis --
 	tennis_ball.y = -15;  -- set y axis --
 	tennis_ball.rotation = 1;
 	
