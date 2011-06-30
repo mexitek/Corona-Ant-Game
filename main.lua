@@ -1,6 +1,7 @@
 -- ** load all libraries being used ** --
 local ui = require( "libraries/ui" );
 local imgs = require( "libraries/images" );
+local subpub = require( "libraries/subpub" );
 
 -- ** Set app data (as globals) ** --
 app_globals = {
@@ -111,57 +112,26 @@ physics.addBody( floor, "static", { bounce = 0.4, density = 1.0 } );
 -- ** add ant to stage (global access) ** --
 ant_player = display.newImage( "images/bg_ant.png" );
 
-	-- ** set in middle of screen (on the floor) ** --
-	ant_player.x = 160;
-	ant_player.y = 405;
-	
-	-- ** add physics to ant ** --
-	physics.addBody( ant_player, "kinematic" );
-	
--- ** game controls ** --
-	
-	-- ** interpret touch control ** --
-	local moveLeft = function( e )
-	
-		-- ** move 30px to the left ** --
-		transition.to( ant_player, { time = 100, x= ( ant_player.x - 30 ) } );
-	
-	end
-	
-	local moveRight = function( e )
-	
-		-- ** move 30px to the right ** --
-		transition.to( ant_player, { time = 100, x= ( ant_player.x + 30 ) } );
-	
-	end
-	
-	-- ** create controls ** --
-	local left_btn = ui.newButton{
-		default = imgs.fetchImagePath( "btn_left.png" ),
-		-- over = "btn_whoA.png",
-		onRelease = moveLeft
-	};
-	
-	local right_btn = ui.newButton{
-		default = imgs.fetchImagePath( "btn_right.png" ),
-		-- over = "btn_whoA.png",
-		onRelease = moveRight
-	};
-		
-		-- ** position controls ** --
-		if( app_globals.is_high_res ) then
-			left_btn.x = 52;	
-			left_btn.y = 910;
-			right_btn.x = 590;
-			right_btn.y = 910;
-		else
-			left_btn.x = 26;	
-			left_btn.y = 455;
-			right_btn.x = 295;
-			right_btn.y = 455;
-		end
-	
+-- ** set in middle of screen (on the floor) ** --
+ant_player.x = 160;
+ant_player.y = 405;
+ant_teleport = function(e)
+	-- ** move 30px to the right ** --
+	transition.to( ant_player, { time = 100, x=e.x } );
+	-- ** Notify application the ant has moved ** --
+	subpub.publish("ant_moved",antplayer);
+end
+-- ** Subscribe to "player_touched" ** --
+subpub.subscribe("player_touched",ant_teleport);
+
+-- ** add physics to ant ** --
+physics.addBody( ant_player, "kinematic" );
+
 -- ** start balls ** --
 spawnBall();
 
---native.showAlert( "test", display.stageWidth .. " == " .. display.stageHeight );
+
+-- ==========================================
+-- = Listen: When player touches the screen =
+-- ==========================================
+Runtime:addEventListener("touch", function(e) subpub.publish("player_touched",e); end)

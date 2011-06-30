@@ -15,8 +15,9 @@
 -- ==================================================
 -- = Quick SubPub Test: paste this in your main.lua =
 -- ==================================================
---subpub.subscribe("test",function() native.showAlert( "test", "SubPub works!!" ) end);
---subpub.publish("test","");
+--local subpub = require( "libraries/subpub" );
+--subpub.subscribe("test",function(show_text) native.showAlert( "test", show_text ) end);
+--subpub.publish("test","Woohoo! SubPub works!!");
 -- ==================================================
 
 
